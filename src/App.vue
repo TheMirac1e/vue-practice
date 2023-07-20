@@ -18,20 +18,9 @@
             </div>
             <div class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
               <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                BTC
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-                CHD
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+                v-for="item in coinBtnList" v-bind:key="item.name">
+                {{ item.name }}
               </span>
             </div>
             <p class="text-sm text-red-600" :style="{ display: `${error ? 'block' : 'none'}` }">Такой тикер уже добавлен
@@ -114,7 +103,9 @@ export default {
       tickers: [],
       sel: null,
       graph: [],
-      error: false
+      error: false,
+      coinList: [],
+      coinBtnList: []
     }
   },
 
@@ -128,6 +119,12 @@ export default {
         this.subscribeToUpdates(ticker.name);
       })
     }
+    this.fetchCoinList();
+
+    this.$watch('ticker', () => {
+      this.updateCoinBtnList()
+      this.error = false
+    });
   },
 
   methods: {
@@ -147,9 +144,37 @@ export default {
       }, 3000)
     },
 
-    add () {
+    async fetchCoinList() {
+      const fetchLink = await fetch(`https://min-api.cryptocompare.com/data/blockchain/list?api_key=${API_KEY}`)
+      const response = await fetchLink.json();
+
+      for (const key in response.Data) {
+        const newCoin = {
+          name: key
+        }
+
+        this.coinList.push(newCoin);
+      }
+
+      this.coinBtnList = this.coinList.splice(0, 4);
+    },
+
+    updateCoinBtnList() {
+      if (this.ticker === '') {
+        this.coinBtnList = this.coinList.splice(0, 4);
+      } else {
+        this.coinBtnList = this.coinList.filter(coin => coin.name.includes(this.ticker.toUpperCase())).splice(0, 4);
+      }
+    },
+
+    add() {
+      if (this.ticker === '' || this.tickers.find(ticker => ticker.name === this.ticker.toUpperCase())) {
+        this.error = true;
+        return;
+      }
+
       const currentTicker = {
-        name: this.ticker,
+        name: this.ticker.toUpperCase(),
         price: '-'
       }
 
@@ -160,6 +185,7 @@ export default {
 
       this.ticker = ''
     },
+
     deleteHandler(itemToDelete) {
       this.tickers = this.tickers.filter((item) => item !== itemToDelete)
 
@@ -179,6 +205,7 @@ export default {
       this.sel = ticker
       this.graph = []
     },
+
     normalizeGraph() {
       const maxValue = Math.max(...this.graph)
       const minValue = Math.min(...this.graph)
