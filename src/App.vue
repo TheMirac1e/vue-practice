@@ -108,7 +108,7 @@ import { API_KEY } from './static/static.js'
 export default {
   name: 'App',
 
-  data () {
+  data() {
     return {
       ticker: '',
       tickers: [],
@@ -118,7 +118,7 @@ export default {
     }
   },
 
-  created () {
+  created() {
     const tickerData = localStorage.getItem('criptonomicon-list');
 
     if (tickerData) {
@@ -131,7 +131,7 @@ export default {
   },
 
   methods: {
-    subscribeToUpdates (tickkerName) {
+    subscribeToUpdates(tickkerName) {
       setInterval(async () => {
         const f = await fetch(
           `https://min-api.cryptocompare.com/data/price?fsym=${tickkerName}&tsyms=USD&api_key=${API_KEY}`
@@ -160,14 +160,26 @@ export default {
 
       this.ticker = ''
     },
-    deleteHandler (itemToDelete) {
+    deleteHandler(itemToDelete) {
       this.tickers = this.tickers.filter((item) => item !== itemToDelete)
+
+      const localStorageData = JSON.parse(localStorage.getItem('criptonomicon-list'));
+
+      if (localStorageData) {
+        localStorageData.forEach((item, i) => {
+          if (item.name === itemToDelete.name) {
+            localStorageData.splice(i, 1);
+          }
+        });
+
+        localStorage.setItem('criptonomicon-list', JSON.stringify(localStorageData));
+      }
     },
-    select (ticker) {
+    select(ticker) {
       this.sel = ticker
       this.graph = []
     },
-    normalizeGraph () {
+    normalizeGraph() {
       const maxValue = Math.max(...this.graph)
       const minValue = Math.min(...this.graph)
 
