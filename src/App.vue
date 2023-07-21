@@ -167,10 +167,10 @@ export default {
       }
     },
 
-    selectCoin(e) {
-      const coint = e.target.textContent;
+    selectCoin({ target }) {
+      const coin = target.textContent;
 
-      this.ticker = coint;
+      this.ticker = coin;
       this.add();
     },
 
