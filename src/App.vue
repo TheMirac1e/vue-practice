@@ -19,7 +19,7 @@
             <div class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
               <span
                 class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-                v-for="item in coinBtnList" v-bind:key="item.name">
+                v-for="item in coinBtnList" :key="item.name" @click="selectCoin($event)">
                 {{ item.name }}
               </span>
             </div>
@@ -167,6 +167,13 @@ export default {
       }
     },
 
+    selectCoin(e) {
+      const coint = e.target.textContent;
+
+      this.ticker = coint;
+      this.add();
+    },
+
     add() {
       if (this.ticker === '' || this.tickers.find(ticker => ticker.name === this.ticker.toUpperCase())) {
         this.error = true;
@@ -201,6 +208,7 @@ export default {
         localStorage.setItem('criptonomicon-list', JSON.stringify(localStorageData));
       }
     },
+
     select(ticker) {
       this.sel = ticker
       this.graph = []
